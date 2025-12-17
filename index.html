@@ -1,13 +1,25 @@
 <!doctype html>
+<!-- `index.html` - Single-page application entry for Vite + React.
+     Provides the HTML shell, root mounting point, and loads the client module. -->
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <!-- Character encoding for the document -->
+    <meta charset="UTF-8"/>
+    <!-- Favicon used by the dev server / build -->
+    <link href="/vite.svg" rel="icon" type="image/svg+xml"/>
+    <!-- Responsive viewport settings for mobile devices -->
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <!-- Document title shown in the browser tab -->
     <title>sih-2025-jharkhand-tourism</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+</head>
+<body>
+<!-- Root element where the React app will mount (React renders into this div) -->
+<div id="root"></div>
+<!--
+  Load the application's entry module.
+  - `type="module"` enables ES module loading in the browser (used by Vite).
+  - The path `/src/main.tsx` is resolved by Vite during dev and build.
+-->
+<script src="/src/main.tsx" type="module"></script>
+</body>
 </html>
