@@ -1,45 +1,4 @@
-/**
- * Avatar component based on DaisyUI
- *
- * @component
- * @example
- * // Basic avatar
- * <Avatar src="/path/to/image.jpg" alt="User name" />
- *
- * @example
- * // Avatar with online status
- * <Avatar src="/path/to/image.jpg" alt="User name" status="online" />
- *
- * @example
- * // Placeholder avatar with initials
- * <Avatar placeholder="JD" />
- */
-
-type PresenceStatus = 'online' | 'offline';
-type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
-type AvatarShape = 'circle' | 'rounded' | 'square';
-
-interface AvatarProps {
-	/** Image source URL */
-	src?: string;
-	/** Alt text for the image */
-	alt?: string;
-	/** Predefined size of the avatar */
-	size?: AvatarSize;
-	/** Shape of the avatar */
-	shape?: AvatarShape;
-	/** Online/offline presence indicator */
-	status?: PresenceStatus;
-	/** Text to display when in placeholder mode (e.g., initials) */
-	placeholder?: string;
-	/** Whether to show a ring around the avatar */
-	ring?: boolean;
-	/** Tailwind ring color class */
-	ringColor?: string;
-	/** Additional CSS classes */
-	className?: string;
-}
-
+import type {AvatarProps} from './AvatarProps';
 /**
  * Avatar component for displaying user profile images or placeholders
  *
