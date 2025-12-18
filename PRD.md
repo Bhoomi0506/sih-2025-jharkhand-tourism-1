@@ -778,406 +778,130 @@ src/
 
 ### Atom Components
 
-#### Button Component
+#### Avatar Component
 
-```tsx
-// components/atoms/Button/Button.tsx
-import React from 'react';
-
-export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  /** Visual style variant */
-  variant?: 'primary' | 'secondary' | 'accent' | 'outline' | 'ghost' | 'link';
-  /** Size of the button */
-  size?: 'xs' | 'sm' | 'md' | 'lg';
-  /** Show loading spinner */
-  loading?: boolean;
-  /** Make button full width */
-  fullWidth?: boolean;
-  /** Icon element to display */
-  icon?: React.ReactNode;
-  /** Position of icon relative to text */
-  iconPosition?: 'left' | 'right';
-  /** Button content */
-  children: React.ReactNode;
-}
-
-export const Button = ({
-  variant = 'primary',
-  size = 'md',
-  loading = false,
-  disabled = false,
-  fullWidth = false,
-  icon,
-  iconPosition = 'left',
-  children,
-  className = '',
-  type = 'button',
-  ...props
-}: ButtonProps) => {
-  const variantClasses: Record<string, string> = {
-    primary: 'btn-primary',
-    secondary: 'btn-secondary',
-    accent: 'btn-accent',
-    outline: 'btn-outline',
-    ghost: 'btn-ghost',
-    link: 'btn-link',
-  };
-  
-  const sizeClasses: Record<string, string> = {
-    xs: 'btn-xs',
-    sm: 'btn-sm',
-    md: '',
-    lg: 'btn-lg',
-  };
-  
-  return (
-    <button
-      type={type}
-      className={`btn font-heading ${variantClasses[variant]} ${sizeClasses[size]} ${fullWidth ? 'btn-block' : ''} ${className}`}
-      disabled={disabled || loading}
-      aria-busy={loading}
-      aria-disabled={disabled || loading}
-      {...props}
-    >
-      {loading && <span className="loading loading-spinner loading-sm" />}
-      {!loading && icon && iconPosition === 'left' && <span className="mr-2">{icon}</span>}
-      <span>{children}</span>
-      {!loading && icon && iconPosition === 'right' && <span className="ml-2">{icon}</span>}
-    </button>
-  );
-};
-```
-
----
-
-#### Rating Component
-
-```tsx
-// components/atoms/Rating/Rating.tsx
-import React from 'react';
-
-export interface RatingProps {
-  /** Rating value (0-5, supports half stars) */
-  value: number;
-  /** Maximum rating value */
-  max?: number;
-  /** Size of stars */
-  size?: 'sm' | 'md' | 'lg';
-  /** Show numeric value alongside stars */
-  showValue?: boolean;
-  /** Number of reviews (displayed in parentheses) */
-  reviewCount?: number;
-  /** Additional CSS classes */
-  className?: string;
-}
-
-export const Rating = ({
-  value,
-  max = 5,
-  size = 'md',
-  showValue = false,
-  reviewCount,
-  className = '',
-}: RatingProps) => {
-  const sizeClasses: Record<string, string> = {
-    sm: 'text-sm',
-    md: 'text-base',
-    lg: 'text-lg',
-  };
-
-  const stars = [];
-  for (let i = 1; i <= max; i++) {
-    if (i <= Math.floor(value)) {
-      stars.push(
-        <span key={i} className="material-symbols-outlined text-secondary" aria-hidden="true">
-          star
-        </span>
-      );
-    } else if (i - 0.5 <= value) {
-      stars.push(
-        <span key={i} className="material-symbols-outlined text-secondary" aria-hidden="true">
-          star_half
-        </span>
-      );
-    } else {
-      stars.push(
-        <span key={i} className="material-symbols-outlined text-base-300" aria-hidden="true">
-          star
-        </span>
-      );
-    }
-  }
-
-  return (
-    <div className={`flex items-center gap-1 ${sizeClasses[size]} ${className}`}>
-      <div className="flex" role="img" aria-label={`Rating: ${value} out of ${max} stars`}>
-        {stars}
-      </div>
-      {showValue && <span className="font-medium">{value.toFixed(1)}</span>}
-      {reviewCount !== undefined && (
-        <span className="text-base-content/60">({reviewCount})</span>
-      )}
-    </div>
-  );
-};
-```
-
----
-
-#### Price Component
-
-```tsx
-// components/atoms/Price/Price.tsx
-import React from 'react';
-
-export interface PriceProps {
-  /** Price amount in INR */
-  amount: number;
-  /** Original price for showing discount */
-  originalAmount?: number;
-  /** Price period (e.g., "per night", "per day") */
-  period?: string;
-  /** Size variant */
-  size?: 'sm' | 'md' | 'lg' | 'xl';
-  /** Additional CSS classes */
-  className?: string;
-}
-
-export const Price = ({
-  amount,
-  originalAmount,
-  period,
-  size = 'md',
-  className = '',
-}: PriceProps) => {
-  const sizeClasses: Record<string, { price: string; period: string }> = {
-    sm: { price: 'text-base font-semibold', period: 'text-xs' },
-    md: { price: 'text-lg font-semibold', period: 'text-sm' },
-    lg: { price: 'text-2xl font-bold', period: 'text-base' },
-    xl: { price: 'text-3xl font-bold', period: 'text-lg' },
-  };
-
-  const formatPrice = (value: number) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value);
-  };
-
-  const hasDiscount = originalAmount && originalAmount > amount;
-  const discountPercent = hasDiscount
-    ? Math.round(((originalAmount - amount) / originalAmount) * 100)
-    : 0;
-
-  return (
-    <div className={`flex items-baseline gap-2 ${className}`}>
-      <span className={`${sizeClasses[size].price} text-base-content`}>
-        {formatPrice(amount)}
-      </span>
-      
-      {hasDiscount && (
-        <>
-          <span className={`${sizeClasses[size].period} text-base-content/50 line-through`}>
-            {formatPrice(originalAmount)}
-          </span>
-          <span className="badge badge-secondary badge-sm">
-            {discountPercent}% off
-          </span>
-        </>
-      )}
-      
-      {period && (
-        <span className={`${sizeClasses[size].period} text-base-content/60`}>
-          {period}
-        </span>
-      )}
-    </div>
-  );
-};
-```
+**Key Design Decisions:**
+- Built on DaisyUI's avatar component system
+- Supports 5 size variants (xs, sm, md, lg, xl) with fixed width classes
+- Three shape options: circle (rounded-full), rounded (rounded-xl), square (rounded)
+- Presence indicators for online/offline status using DaisyUI avatar-online/offline classes
+- Placeholder mode with initials for users without profile images
+- Optional ring styling with customizable colors and offset
+- Default placeholder image fallback using placehold.co service
+- Separate text size scaling for placeholder initials to maintain readability
+- Dynamic class construction using filter(Boolean).join() pattern for clean class composition
 
 ---
 
 #### Badge Component
 
-```tsx
-// components/atoms/Badge/Badge.tsx
-import React from 'react';
-
-export interface BadgeProps {
-  /** Badge variant */
-  variant?: 'default' | 'primary' | 'secondary' | 'accent' | 'success' | 'warning' | 'error' | 'info';
-  /** Size of badge */
-  size?: 'xs' | 'sm' | 'md' | 'lg';
-  /** Show outline style */
-  outline?: boolean;
-  /** Icon to display before text */
-  icon?: string;
-  /** Badge content */
-  children: React.ReactNode;
-  /** Additional CSS classes */
-  className?: string;
-}
-
-export const Badge = ({
-  variant = 'default',
-  size = 'md',
-  outline = false,
-  icon,
-  children,
-  className = '',
-}: BadgeProps) => {
-  const variantClasses: Record<string, string> = {
-    default: '',
-    primary: 'badge-primary',
-    secondary: 'badge-secondary',
-    accent: 'badge-accent',
-    success: 'badge-success',
-    warning: 'badge-warning',
-    error: 'badge-error',
-    info: 'badge-info',
-  };
-
-  const sizeClasses: Record<string, string> = {
-    xs: 'badge-xs',
-    sm: 'badge-sm',
-    md: '',
-    lg: 'badge-lg',
-  };
-
-  return (
-    <span
-      className={`badge ${variantClasses[variant]} ${sizeClasses[size]} ${outline ? 'badge-outline' : ''} ${className}`}
-    >
-      {icon && (
-        <span className="material-symbols-outlined text-sm mr-1" aria-hidden="true">
-          {icon}
-        </span>
-      )}
-      {children}
-    </span>
-  );
-};
-```
+**Key Design Decisions:**
+- Built on DaisyUI's badge component
+- 5 size variants (xs, sm, md, lg, xl) using badge-* modifier classes
+- 8 semantic color variants aligned with theme (neutral, primary, secondary, accent, info, success, warning, error)
+- 5 style options: default (filled), outline, dash, soft, ghost for different visual weights
+- Simple implementation focusing on text content display
+- Flexible variant system supporting both color and style independently
 
 ---
 
-#### Avatar Component
+#### Button Component
 
-```tsx
-// components/atoms/Avatar/Avatar.tsx
-import React from 'react';
+**Key Design Decisions:**
+- Built on DaisyUI's btn component system
+- 5 size variants (xs, sm, md, lg, xl) using btn-* modifier classes
+- 8 semantic color variants matching theme colors
+- 6 style options: default, outline, dash, soft, ghost, link for different contexts
+- Shape modifiers: square, circle, wide, block for layout flexibility
+- Loading state with DaisyUI's loading spinner component
+- Active state support for toggle-style buttons
+- Polymorphic rendering: can render as <button> or <a> tag based on 'as' prop
+- Uses font-heading for consistent typography with brand guidelines
 
-type PresenceStatus = 'online' | 'offline';
-type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
-type AvatarShape = 'circle' | 'rounded' | 'square';
+---
 
-export interface AvatarProps {
-  /** Image source URL */
-  src?: string;
-  /** Alt text for the image */
-  alt?: string;
-  /** Predefined size of the avatar */
-  size?: AvatarSize;
-  /** Shape of the avatar */
-  shape?: AvatarShape;
-  /** Online/offline presence indicator */
-  status?: PresenceStatus;
-  /** Text to display when in placeholder mode (e.g., initials) */
-  placeholder?: string;
-  /** Whether to show a ring around the avatar */
-  ring?: boolean;
-  /** Tailwind ring color class */
-  ringColor?: string;
-  /** Additional CSS classes */
-  className?: string;
-}
+#### Icon Component
 
-/**
- * Avatar component for displaying user profile images or placeholders
- * Based on DaisyUI avatar component
- *
- * @example
- * // Basic avatar
- * <Avatar src="/path/to/image.jpg" alt="User name" />
- *
- * @example
- * // Avatar with online status
- * <Avatar src="/path/to/image.jpg" alt="User name" status="online" />
- *
- * @example
- * // Placeholder avatar with initials
- * <Avatar placeholder="JD" />
- */
-export const Avatar = ({
-  src = "https://placehold.co/64x64?text=DB",
-  alt = 'Avatar',
-  size = 'md',
-  shape = 'circle',
-  status,
-  placeholder,
-  ring = false,
-  ringColor = 'ring-primary',
-  className = ''
-}: AvatarProps) => {
-  // Size mapping
-  const sizeClasses = {
-    xs: 'w-8',
-    sm: 'w-12',
-    md: 'w-16',
-    lg: 'w-24',
-    xl: 'w-32'
-  };
+**Key Design Decisions:**
+- Uses Google Material Symbols icon font
+- 7 size variants (xs to 3xl) mapped to Tailwind text size classes
+- Three visual variants: outlined (default), rounded, sharp matching Material Design styles
+- Theme color integration with DaisyUI semantic colors
+- Font variation settings control via CSS fontVariationSettings for FILL, weight, GRAD, opsz
+- Click handler support with proper role and tabIndex for accessibility
+- ARIA label support with fallback to icon name for screen readers
+- Cursor pointer automatically added when interactive
 
-  // Shape mapping
-  const shapeClasses = {
-    circle: 'rounded-full',
-    rounded: 'rounded-xl',
-    square: 'rounded'
-  };
+---
 
-  // Placeholder text size mapping
-  const textSizeClasses = {
-    xs: 'text-xs',
-    sm: 'text-sm',
-    md: 'text-base',
-    lg: 'text-xl',
-    xl: 'text-3xl'
-  };
+#### Input Component
 
-  // Build avatar container classes
-  const avatarClasses = [
-    'avatar',
-    status === 'online' && 'avatar-online',
-    status === 'offline' && 'avatar-offline',
-    placeholder && 'avatar-placeholder',
-    className
-  ].filter(Boolean).join(' ');
+**Key Design Decisions:**
+- Built on DaisyUI's input component
+- 5 size variants (xs, sm, md, lg, xl) using input-* modifier classes
+- 8 semantic color variants for validation states (neutral, primary, secondary, accent, info, success, warning, error)
+- 2 style options: default and ghost for different visual contexts
+- Optional bordered prop for explicit border control
+- Minimal wrapper - spreads all HTML input attributes for full native functionality
+- No built-in label or error handling - designed for composition in FormField molecule
 
-  // Build inner div classes
-  const innerClasses = [
-    sizeClasses[size],
-    shapeClasses[shape],
-    ring && `ring-2 ${ringColor} ring-offset-base-100 ring-offset-2`,
-    placeholder && 'bg-neutral text-neutral-content',
-    !placeholder && 'bg-base-300'
-  ].filter(Boolean).join(' ');
+---
 
-  return (
-    <div className={avatarClasses}>
-      <div className={innerClasses}>
-        {placeholder ? (
-          <span className={textSizeClasses[size]}>{placeholder}</span>
-        ) : (
-          <img src={src} alt={alt} />
-        )}
-      </div>
-    </div>
-  );
-};
-```
+#### Price Component
+
+**Key Design Decisions:**
+- Uses Intl.NumberFormat for proper INR currency formatting with Indian locale (en-IN)
+- Zero decimal places for whole rupee amounts (minimumFractionDigits: 0)
+- 4 size variants (sm, md, lg, xl) with separate sizing for price and period text
+- Discount support with strikethrough original price and percentage badge
+- Automatic discount percentage calculation displayed in secondary-colored badge
+- Optional period text (e.g., "per night") with reduced opacity for hierarchy
+- Semantic color classes (text-base-content) for consistent theming
+- Flexbox baseline alignment for clean visual alignment between price, discount, and period
+
+---
+
+#### Rating Component
+
+**Key Design Decisions:**
+- Built on DaisyUI's rating component with radio input foundation
+- 5 size variants (xs, sm, md, lg, xl) using rating-* modifier classes
+- 3 mask shapes: star (default), star-2 (alternate design), heart for different contexts
+- Half-star support using mask-half-1 and mask-half-2 classes for granular ratings
+- Dual mode: read-only (divs) vs interactive (radio inputs) with automatic mode switching
+- Optional clear button for resetting interactive ratings
+- ARIA labels on each star for accessibility with proper singular/plural handling
+- Radio input pattern ensures single selection with HTML5 form integration
+- Gap spacing option for visual breathing room between stars
+
+---
+
+#### Skeleton Component
+
+**Key Design Decisions:**
+- Built on DaisyUI's skeleton component
+- 2 variants: default (block) and text (inline) for different loading contexts
+- 3 shape options: rectangle (default), circle (avatars), custom (user-defined)
+- Custom width and height support via Tailwind utility classes
+- Polymorphic rendering: <div> for default, <span> for text variant
+- Can wrap content for preserving layout structure during loading
+- Minimal implementation focusing on DaisyUI's built-in shimmer animation
+
+---
+
+#### Tag Component
+
+**Key Design Decisions:**
+- Built on DaisyUI's badge component as foundation
+- 5 size variants (xs, sm, md, lg, xl) reusing badge-* classes
+- 8 semantic color variants matching theme
+- 4 style options: default, outline, soft, ghost for visual hierarchy
+- Dismissible functionality with close button and custom icon support
+- Interactive mode with click handler, role="button", and tabIndex for keyboard access
+- Hover scale animation (scale-105) on interactive tags for visual feedback
+- Stop propagation on dismiss to prevent triggering tag click
+- Built-in gap-1 spacing between content and dismiss button
+- Default SVG dismiss icon with hover opacity transition
 
 ---
 
@@ -1185,17 +909,15 @@ export const Avatar = ({
 
 | Component | Purpose | Key Props | States |
 |-----------|---------|-----------|--------|
-| **Button** | Action triggers | variant, size, loading, icon | default, hover, active, focus, loading, disabled |
-| **Input** | Text/number input | type, error, disabled, icon | default, focus, error, disabled |
-| **Rating** | Star ratings display | value, showValue, reviewCount | readonly display |
-| **Price** | Currency display | amount, originalAmount, period | default, discounted |
-| **Badge** | Status/category tags | variant, size, icon | default |
-| **Avatar** | User/host images | src, alt, size, fallback | default, loading, error |
-| **Icon** | Material symbols | name, size, className | default |
-| **Tag** | Filter tags | label, removable, onClick | default, selected |
-| **Skeleton** | Loading placeholder | variant (text, circle, rect) | loading |
-| **Checkbox** | Boolean selection | checked, disabled | unchecked, checked, disabled |
-| **Toggle** | On/off switches | checked, disabled | off, on |
+| **Avatar** | User/host images | src, alt, size, shape, status, placeholder | default, online, offline |
+| **Badge** | Status/category labels | variant, size, style | default |
+| **Button** | Action triggers | variant, size, style, loading, as | default, hover, active, focus, loading, disabled |
+| **Icon** | Material symbols | name, size, variant, color | default, interactive |
+| **Input** | Text/number input | size, variant, style, bordered | default, focus, error, disabled |
+| **Price** | Currency display | amount, originalAmount, period, size | default, discounted |
+| **Rating** | Star ratings | totalStars, size, mask, half, readOnly | readonly, interactive |
+| **Skeleton** | Loading placeholder | variant, shape, width, height | loading |
+| **Tag** | Filter/category tags | variant, size, style, dismissible, interactive | default, interactive |
 
 ---
 
@@ -1203,330 +925,48 @@ export const Avatar = ({
 
 #### ListingCard Component
 
-```tsx
-// components/molecules/ListingCard/ListingCard.tsx
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Rating } from '@/components/atoms/Rating';
-import { Price } from '@/components/atoms/Price';
-import { Badge } from '@/components/atoms/Badge';
-
-export interface ListingCardProps {
-  /** Unique listing ID */
-  id: string;
-  /** Type of listing */
-  type: 'homestay' | 'guide' | 'product';
-  /** Listing title */
-  title: string;
-  /** Location or category */
-  subtitle: string;
-  /** Primary image URL */
-  image: string;
-  /** Rating value */
-  rating: number;
-  /** Number of reviews */
-  reviewCount: number;
-  /** Price amount */
-  price: number;
-  /** Price period (e.g., "per night") */
-  pricePeriod?: string;
-  /** Optional badges */
-  badges?: Array<{ label: string; variant: 'accent' | 'secondary' | 'primary' }>;
-  /** Is listing saved to wishlist */
-  isSaved?: boolean;
-  /** Callback when save button clicked */
-  onSaveToggle?: (id: string) => void;
-}
-
-export const ListingCard = ({
-  id,
-  type,
-  title,
-  subtitle,
-  image,
-  rating,
-  reviewCount,
-  price,
-  pricePeriod,
-  badges = [],
-  isSaved = false,
-  onSaveToggle,
-}: ListingCardProps) => {
-  const typeRoutes: Record<string, string> = {
-    homestay: '/homestays',
-    guide: '/guides',
-    product: '/marketplace',
-  };
-
-  const handleSaveClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    onSaveToggle?.(id);
-  };
-
-  return (
-    <Link
-      to={`${typeRoutes[type]}/${id}`}
-      className="card bg-base-100 shadow-md hover:shadow-lg transition-shadow group"
-    >
-      {/* Image Container */}
-      <figure className="relative aspect-[4/3] overflow-hidden">
-        <img
-          src={image}
-          alt={title}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-          loading="lazy"
-        />
-        
-        {/* Save Button */}
-        <button
-          onClick={handleSaveClick}
-          className="absolute top-3 right-3 btn btn-circle btn-sm bg-base-100/80 hover:bg-base-100 border-0"
-          aria-label={isSaved ? 'Remove from saved' : 'Save listing'}
-        >
-          <span className="material-symbols-outlined text-lg">
-            {isSaved ? 'favorite' : 'favorite_border'}
-          </span>
-        </button>
-
-        {/* Badges */}
-        {badges.length > 0 && (
-          <div className="absolute top-3 left-3 flex flex-wrap gap-1">
-            {badges.map((badge, index) => (
-              <Badge key={index} variant={badge.variant} size="sm">
-                {badge.label}
-              </Badge>
-            ))}
-          </div>
-        )}
-      </figure>
-
-      {/* Content */}
-      <div className="card-body p-4">
-        <h3 className="card-title text-lg font-heading line-clamp-1">{title}</h3>
-        
-        <p className="text-base-content/60 text-sm flex items-center gap-1">
-          <span className="material-symbols-outlined text-sm">location_on</span>
-          {subtitle}
-        </p>
-
-        <div className="flex items-center justify-between mt-2">
-          <Rating value={rating} reviewCount={reviewCount} size="sm" />
-          <Price amount={price} period={pricePeriod} size="sm" />
-        </div>
-      </div>
-    </Link>
-  );
-};
-```
+**Key Design Decisions:**
+- Wraps entire card in React Router Link for full-card clickability
+- Uses DaisyUI's card component with shadow-md and hover:shadow-lg for depth
+- 4:3 aspect ratio for image consistency across listings
+- Image hover scale effect (scale-105) on group hover for interactivity
+- Lazy loading images for performance optimization
+- Floating save button (favorite icon) with semi-transparent background
+- Prevents click propagation on save button to avoid navigation
+- Absolute positioned badges in top-left corner with flexbox wrapping
+- Card body with fixed padding (p-4) for consistent spacing
+- Location displayed with Material icon for visual hierarchy
+- Bottom flex layout for rating and price with space-between alignment
 
 ---
 
 #### SearchBar Component
 
-```tsx
-// components/molecules/SearchBar/SearchBar.tsx
-import React, { useState } from 'react';
-
-export interface SearchBarProps {
-  /** Placeholder text */
-  placeholder?: string;
-  /** Current search value */
-  value?: string;
-  /** Callback when search is submitted */
-  onSearch: (query: string) => void;
-  /** Callback when value changes */
-  onChange?: (value: string) => void;
-  /** Show filter button */
-  showFilterButton?: boolean;
-  /** Callback when filter button clicked */
-  onFilterClick?: () => void;
-  /** Size variant */
-  size?: 'sm' | 'md' | 'lg';
-  /** Additional CSS classes */
-  className?: string;
-}
-
-export const SearchBar = ({
-  placeholder = 'Search destinations, homestays, guides...',
-  value: controlledValue,
-  onSearch,
-  onChange,
-  showFilterButton = true,
-  onFilterClick,
-  size = 'md',
-  className = '',
-}: SearchBarProps) => {
-  const [internalValue, setInternalValue] = useState('');
-  const value = controlledValue ?? internalValue;
-
-  const sizeClasses: Record<string, string> = {
-    sm: 'input-sm',
-    md: '',
-    lg: 'input-lg',
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value;
-    setInternalValue(newValue);
-    onChange?.(newValue);
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSearch(value);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      onSearch(value);
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className={`flex gap-2 ${className}`}>
-      <div className="relative flex-1">
-        <span className="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-base-content/50">
-          search
-        </span>
-        <input
-          type="search"
-          value={value}
-          onChange={handleChange}
-          onKeyDown={handleKeyDown}
-          placeholder={placeholder}
-          className={`input input-bordered w-full pl-10 ${sizeClasses[size]}`}
-          aria-label="Search"
-        />
-      </div>
-      
-      {showFilterButton && (
-        <button
-          type="button"
-          onClick={onFilterClick}
-          className={`btn btn-outline ${sizeClasses[size]}`}
-          aria-label="Open filters"
-        >
-          <span className="material-symbols-outlined">filter_list</span>
-          <span className="hidden sm:inline">Filters</span>
-        </button>
-      )}
-      
-      <button type="submit" className={`btn btn-primary ${sizeClasses[size]}`}>
-        <span className="material-symbols-outlined sm:hidden">search</span>
-        <span className="hidden sm:inline">Search</span>
-      </button>
-    </form>
-  );
-};
-```
+**Key Design Decisions:**
+- Form-based implementation for native submit handling
+- Controlled/uncontrolled dual mode with internal state fallback
+- Material icon positioned absolutely inside input (left padding adjustment)
+- Filter button with responsive text (icon-only on mobile, text on desktop)
+- Submit button with adaptive content (icon on mobile, text on desktop)
+- Enter key triggers search via onKeyDown handler
+- Size variants mapped to DaisyUI's input and button size classes
+- Flexible layout using flexbox with flex-1 for search input
+- Accessible with proper ARIA labels on icon-only buttons
 
 ---
 
 #### DateRangePicker Component
 
-```tsx
-// components/molecules/DateRangePicker/DateRangePicker.tsx
-import React, { useState } from 'react';
-import { format } from 'date-fns';
-
-export interface DateRange {
-  startDate: Date | null;
-  endDate: Date | null;
-}
-
-export interface DateRangePickerProps {
-  /** Selected date range */
-  value: DateRange;
-  /** Callback when date range changes */
-  onChange: (range: DateRange) => void;
-  /** Minimum selectable date */
-  minDate?: Date;
-  /** Maximum selectable date */
-  maxDate?: Date;
-  /** Placeholder for start date */
-  startPlaceholder?: string;
-  /** Placeholder for end date */
-  endPlaceholder?: string;
-  /** Error message */
-  error?: string;
-  /** Additional CSS classes */
-  className?: string;
-}
-
-export const DateRangePicker = ({
-  value,
-  onChange,
-  minDate = new Date(),
-  maxDate,
-  startPlaceholder = 'Check-in',
-  endPlaceholder = 'Check-out',
-  error,
-  className = '',
-}: DateRangePickerProps) => {
-  const formatDate = (date: Date | null) => {
-    return date ? format(date, 'yyyy-MM-dd') : '';
-  };
-
-  const handleStartChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const date = e.target.value ? new Date(e.target.value) : null;
-    onChange({ ...value, startDate: date });
-  };
-
-  const handleEndChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const date = e.target.value ? new Date(e.target.value) : null;
-    onChange({ ...value, endDate: date });
-  };
-
-  return (
-    <div className={`flex flex-col gap-2 ${className}`}>
-      <div className="flex gap-2">
-        <div className="form-control flex-1">
-          <label className="label">
-            <span className="label-text">{startPlaceholder}</span>
-          </label>
-          <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-base-content/50">
-              calendar_month
-            </span>
-            <input
-              type="date"
-              value={formatDate(value.startDate)}
-              onChange={handleStartChange}
-              min={minDate ? formatDate(minDate) : undefined}
-              max={value.endDate ? formatDate(value.endDate) : maxDate ? formatDate(maxDate) : undefined}
-              className={`input input-bordered w-full pl-10 ${error ? 'input-error' : ''}`}
-            />
-          </div>
-        </div>
-
-        <div className="form-control flex-1">
-          <label className="label">
-            <span className="label-text">{endPlaceholder}</span>
-          </label>
-          <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-base-content/50">
-              calendar_month
-            </span>
-            <input
-              type="date"
-              value={formatDate(value.endDate)}
-              onChange={handleEndChange}
-              min={value.startDate ? formatDate(value.startDate) : minDate ? formatDate(minDate) : undefined}
-              max={maxDate ? formatDate(maxDate) : undefined}
-              className={`input input-bordered w-full pl-10 ${error ? 'input-error' : ''}`}
-            />
-          </div>
-        </div>
-      </div>
-
-      {error && (
-        <span className="text-error text-sm">{error}</span>
-      )}
-    </div>
-  );
-};
-```
+**Key Design Decisions:**
+- Native HTML date inputs for browser-provided date picker UI
+- date-fns for date formatting to yyyy-MM-dd format required by input type="date"
+- Two-column flex layout with gap-2 for visual separation
+- Form control wrapper for each input with labels
+- Material calendar icon positioned absolutely inside each input
+- Min/max validation: start date max is end date, end date min is start date
+- Error state styling with input-error class and error message display
+- Flexible className prop for container customization
+- Default minDate to current date to prevent past bookings
 
 ---
 
@@ -1552,295 +992,38 @@ export const DateRangePicker = ({
 
 #### Navbar Component
 
-```tsx
-// components/organisms/Navbar/Navbar.tsx
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
-import { Button } from '@/components/atoms/Button';
-import { Avatar } from '@/components/atoms/Avatar';
-import { SearchBar } from '@/components/molecules/SearchBar';
-
-export const Navbar = () => {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  const handleSearch = (query: string) => {
-    navigate(`/search?q=${encodeURIComponent(query)}`);
-  };
-
-  return (
-    <header className="sticky top-0 z-50 bg-base-100 shadow-sm">
-      <nav className="navbar container mx-auto px-4" aria-label="Main navigation">
-        {/* Logo */}
-        <div className="navbar-start">
-          <Link to="/" className="flex items-center gap-2">
-            <span className="text-primary text-2xl font-heading font-bold">
-              JharkhandYatra
-            </span>
-          </Link>
-        </div>
-
-        {/* Desktop Navigation */}
-        <div className="navbar-center hidden lg:flex">
-          <ul className="menu menu-horizontal px-1 gap-1">
-            <li>
-              <Link to="/homestays" className="font-medium">Homestays</Link>
-            </li>
-            <li>
-              <Link to="/guides" className="font-medium">Guides</Link>
-            </li>
-            <li>
-              <Link to="/marketplace" className="font-medium">Marketplace</Link>
-            </li>
-            <li>
-              <Link to="/destinations" className="font-medium">Destinations</Link>
-            </li>
-          </ul>
-        </div>
-
-        {/* Actions */}
-        <div className="navbar-end gap-2">
-          {/* Search (Desktop) */}
-          <div className="hidden md:block w-64">
-            <SearchBar
-              size="sm"
-              showFilterButton={false}
-              onSearch={handleSearch}
-              placeholder="Search..."
-            />
-          </div>
-
-          {user ? (
-            <div className="dropdown dropdown-end">
-              <label tabIndex={0} className="btn btn-ghost btn-circle">
-                <Avatar src={user.avatar} alt={user.name} size="sm" />
-              </label>
-              <ul
-                tabIndex={0}
-                className="dropdown-content menu bg-base-100 rounded-box w-52 p-2 shadow-lg"
-              >
-                <li><Link to="/profile">My Profile</Link></li>
-                <li><Link to="/bookings">My Bookings</Link></li>
-                <li><Link to="/wishlist">Wishlist</Link></li>
-                {user.role === 'provider' && (
-                  <li><Link to="/dashboard">Dashboard</Link></li>
-                )}
-                <li><hr className="my-2" /></li>
-                <li><button onClick={logout}>Logout</button></li>
-              </ul>
-            </div>
-          ) : (
-            <>
-              <Button variant="ghost" size="sm" onClick={() => navigate('/login')}>
-                Sign In
-              </Button>
-              <Button variant="primary" size="sm" onClick={() => navigate('/register')}>
-                Sign Up
-              </Button>
-            </>
-          )}
-
-          {/* Cart Icon */}
-          <Link to="/cart" className="btn btn-ghost btn-circle">
-            <div className="indicator">
-              <span className="material-symbols-outlined">shopping_cart</span>
-              <span className="badge badge-secondary badge-sm indicator-item">3</span>
-            </div>
-          </Link>
-
-          {/* Mobile Menu Toggle */}
-          <button
-            className="btn btn-ghost btn-circle lg:hidden"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-expanded={mobileMenuOpen}
-            aria-label="Toggle menu"
-          >
-            <span className="material-symbols-outlined">
-              {mobileMenuOpen ? 'close' : 'menu'}
-            </span>
-          </button>
-        </div>
-      </nav>
-
-      {/* Mobile Menu */}
-      {mobileMenuOpen && (
-        <div className="lg:hidden bg-base-100 border-t border-base-200 pb-4">
-          <div className="container mx-auto px-4 pt-4">
-            <SearchBar onSearch={handleSearch} size="sm" />
-          </div>
-          <ul className="menu px-4 mt-4">
-            <li><Link to="/homestays">Homestays</Link></li>
-            <li><Link to="/guides">Guides</Link></li>
-            <li><Link to="/marketplace">Marketplace</Link></li>
-            <li><Link to="/destinations">Destinations</Link></li>
-          </ul>
-        </div>
-      )}
-    </header>
-  );
-};
-```
+**Key Design Decisions:**
+- Sticky positioning (top-0) with high z-index (z-50) for always-visible navigation
+- DaisyUI's navbar component with three-section layout (start, center, end)
+- Responsive logo: text-only on mobile, with icon/branding on desktop
+- Desktop navigation uses menu-horizontal with gap-1 for proper spacing
+- Hidden on mobile (lg:flex) with separate mobile menu drawer
+- Integrated SearchBar component (hidden on mobile, fixed width on desktop)
+- User authentication state: shows avatar dropdown if logged in, Sign In/Sign Up buttons if not
+- DaisyUI dropdown-end component for user menu with role-based links
+- Cart icon with badge indicator showing item count
+- Mobile menu toggle button with animated icon (menu ↔ close)
+- Collapsible mobile menu with border-top separator and SearchBar integration
+- ARIA labels and semantic HTML for accessibility
 
 ---
 
 #### BookingWidget Component
 
-```tsx
-// components/organisms/BookingWidget/BookingWidget.tsx
-import React, { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { differenceInDays } from 'date-fns';
-import { Button } from '@/components/atoms/Button';
-import { Price } from '@/components/atoms/Price';
-import { DateRangePicker, DateRange } from '@/components/molecules/DateRangePicker';
-import { GuestSelector } from '@/components/molecules/GuestSelector';
-
-export interface BookingWidgetProps {
-  /** Listing ID */
-  listingId: string;
-  /** Type of listing */
-  listingType: 'homestay' | 'guide';
-  /** Price per night/day */
-  pricePerUnit: number;
-  /** Price unit label */
-  priceUnit: string;
-  /** Maximum guests allowed */
-  maxGuests: number;
-  /** Service fee percentage */
-  serviceFeePercent?: number;
-  /** Unavailable dates */
-  unavailableDates?: Date[];
-  /** Minimum stay nights */
-  minStay?: number;
-}
-
-export const BookingWidget = ({
-  listingId,
-  listingType,
-  pricePerUnit,
-  priceUnit,
-  maxGuests,
-  serviceFeePercent = 10,
-  unavailableDates = [],
-  minStay = 1,
-}: BookingWidgetProps) => {
-  const navigate = useNavigate();
-  const [dateRange, setDateRange] = useState<DateRange>({
-    startDate: null,
-    endDate: null,
-  });
-  const [guests, setGuests] = useState({ adults: 1, children: 0 });
-  const [error, setError] = useState<string | null>(null);
-
-  const nights = useMemo(() => {
-    if (dateRange.startDate && dateRange.endDate) {
-      return differenceInDays(dateRange.endDate, dateRange.startDate);
-    }
-    return 0;
-  }, [dateRange]);
-
-  const subtotal = nights * pricePerUnit;
-  const serviceFee = Math.round(subtotal * (serviceFeePercent / 100));
-  const total = subtotal + serviceFee;
-
-  const handleReserve = () => {
-    if (!dateRange.startDate || !dateRange.endDate) {
-      setError('Please select dates');
-      return;
-    }
-    if (nights < minStay) {
-      setError(`Minimum stay is ${minStay} night${minStay > 1 ? 's' : ''}`);
-      return;
-    }
-
-    const bookingParams = new URLSearchParams({
-      listingId,
-      type: listingType,
-      startDate: dateRange.startDate.toISOString(),
-      endDate: dateRange.endDate.toISOString(),
-      adults: guests.adults.toString(),
-      children: guests.children.toString(),
-    });
-
-    navigate(`/booking?${bookingParams.toString()}`);
-  };
-
-  return (
-    <div className="card bg-base-100 shadow-lg border border-base-200 sticky top-24">
-      <div className="card-body">
-        {/* Price Header */}
-        <div className="flex items-baseline gap-2 mb-4">
-          <Price amount={pricePerUnit} size="lg" />
-          <span className="text-base-content/60">{priceUnit}</span>
-        </div>
-
-        {/* Date Selection */}
-        <DateRangePicker
-          value={dateRange}
-          onChange={(range) => {
-            setDateRange(range);
-            setError(null);
-          }}
-          startPlaceholder="Check-in"
-          endPlaceholder="Check-out"
-          error={error && !dateRange.startDate ? error : undefined}
-        />
-
-        {/* Guest Selection */}
-        <div className="mt-4">
-          <GuestSelector
-            adults={guests.adults}
-            children={guests.children}
-            maxGuests={maxGuests}
-            onChange={setGuests}
-          />
-        </div>
-
-        {/* Reserve Button */}
-        <Button
-          variant="primary"
-          fullWidth
-          size="lg"
-          onClick={handleReserve}
-          className="mt-4"
-        >
-          Reserve
-        </Button>
-
-        {error && (
-          <p className="text-error text-sm text-center mt-2">{error}</p>
-        )}
-
-        {/* Price Breakdown */}
-        {nights > 0 && (
-          <div className="mt-6 space-y-3 border-t border-base-200 pt-4">
-            <div className="flex justify-between">
-              <span className="underline">
-                ₹{pricePerUnit.toLocaleString('en-IN')} × {nights} night{nights > 1 ? 's' : ''}
-              </span>
-              <span>₹{subtotal.toLocaleString('en-IN')}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="underline">Service fee</span>
-              <span>₹{serviceFee.toLocaleString('en-IN')}</span>
-            </div>
-            <div className="flex justify-between font-bold text-lg border-t border-base-200 pt-3">
-              <span>Total</span>
-              <span>₹{total.toLocaleString('en-IN')}</span>
-            </div>
-          </div>
-        )}
-
-        <p className="text-center text-sm text-base-content/60 mt-4">
-          You won't be charged yet
-        </p>
-      </div>
-    </div>
-  );
-};
-```
+**Key Design Decisions:**
+- Sticky sidebar positioning (sticky top-24) for visibility during scroll
+- DaisyUI card with shadow-lg and border for elevated appearance
+- date-fns differenceInDays for calculating number of nights
+- useMemo hook for nights calculation to optimize re-renders
+- Integrated DateRangePicker and GuestSelector molecule components
+- Real-time price breakdown showing base price, service fee, and total
+- Dynamic error handling with inline validation messages
+- Minimum stay validation before allowing reservation
+- URLSearchParams for passing booking data to checkout page via query string
+- Conditional rendering of price breakdown only when dates are selected
+- INR formatting using toLocaleString for proper Indian number format
+- Disabled Reserve button logic based on validation state
+- "You won't be charged yet" disclaimer for user confidence
 
 ---
 
@@ -1867,143 +1050,32 @@ export const BookingWidget = ({
 
 #### MainLayout
 
-```tsx
-// components/layouts/MainLayout/MainLayout.tsx
-import React, { FC } from 'react';
-import { Navbar } from '@/components/organisms/Navbar';
-import { Footer } from '@/components/organisms/Footer';
-import { MobileNav } from '@/components/organisms/MobileNav';
-
-export interface MainLayoutProps {
-  children: React.ReactNode;
-  /** Show footer */
-  showFooter?: boolean;
-  /** Show mobile bottom navigation */
-  showMobileNav?: boolean;
-  /** Container width variant */
-  containerWidth?: 'full' | 'default' | 'narrow';
-  /** Background color variant */
-  bgColor?: 'base-100' | 'base-200';
-}
-
-export const MainLayout: FC<MainLayoutProps> = ({
-  children,
-  showFooter = true,
-  showMobileNav = true,
-  containerWidth = 'default',
-  bgColor = 'base-200',
-}) => {
-  const containerClasses: Record<string, string> = {
-    full: 'w-full',
-    default: 'container mx-auto px-4',
-    narrow: 'max-w-3xl mx-auto px-4',
-  };
-
-  return (
-    <div className={`min-h-screen flex flex-col bg-${bgColor}`}>
-      {/* Skip Link */}
-      <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:p-4 focus:bg-primary focus:text-primary-content focus:rounded"
-      >
-        Skip to main content
-      </a>
-
-      <Navbar />
-
-      <main id="main-content" className="flex-1 py-6 md:py-8" role="main">
-        <div className={containerClasses[containerWidth]}>
-          {children}
-        </div>
-      </main>
-
-      {showFooter && <Footer />}
-      
-      {/* Mobile Bottom Navigation */}
-      {showMobileNav && (
-        <div className="md:hidden">
-          <MobileNav />
-        </div>
-      )}
-    </div>
-  );
-};
-```
+**Key Design Decisions:**
+- Flexbox column layout with min-h-screen for full viewport height
+- Three-part structure: Navbar, main content (flex-1 for expansion), Footer
+- Skip to main content link for keyboard navigation accessibility (sr-only with focus:not-sr-only)
+- Configurable container widths: full (w-full), default (container mx-auto px-4), narrow (max-w-3xl)
+- Optional footer and mobile navigation toggling via props
+- Responsive padding on main content (py-6 on mobile, py-8 on desktop)
+- Background color variants using DaisyUI base colors
+- Semantic HTML with role="main" and id="main-content" for accessibility
+- Mobile bottom navigation shown only on mobile (md:hidden)
 
 ---
 
 #### AuthLayout
 
-```tsx
-// components/layouts/AuthLayout/AuthLayout.tsx
-import React, { FC } from 'react';
-import { Link } from 'react-router-dom';
-
-export interface AuthLayoutProps {
-  children: React.ReactNode;
-  /** Title above the form */
-  title: string;
-  /** Subtitle/description */
-  subtitle?: string;
-}
-
-export const AuthLayout: FC<AuthLayoutProps> = ({
-  children,
-  title,
-  subtitle,
-}) => {
-  return (
-    <div className="min-h-screen bg-base-200 flex">
-      {/* Left Side - Decorative (hidden on mobile) */}
-      <div className="hidden lg:flex lg:w-1/2 bg-primary relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary to-primary/80" />
-        <div className="relative z-10 flex flex-col justify-center px-12 text-primary-content">
-          <Link to="/" className="text-3xl font-heading font-bold mb-8">
-            JharkhandYatra
-          </Link>
-          <h2 className="text-4xl font-heading font-bold mb-4">
-            Discover the Soul of Jharkhand
-          </h2>
-          <p className="text-lg opacity-90">
-            Connect with authentic local experiences, tribal homestays, 
-            and skilled artisans across Jharkhand's beautiful landscapes.
-          </p>
-        </div>
-        {/* Decorative tribal pattern overlay */}
-        <div className="absolute bottom-0 right-0 w-64 h-64 opacity-10">
-          {/* SVG pattern would go here */}
-        </div>
-      </div>
-
-      {/* Right Side - Form */}
-      <div className="flex-1 flex items-center justify-center p-8">
-        <div className="w-full max-w-md">
-          {/* Mobile Logo */}
-          <Link to="/" className="lg:hidden block text-center mb-8">
-            <span className="text-2xl font-heading font-bold text-primary">
-              JharkhandYatra
-            </span>
-          </Link>
-
-          <div className="card bg-base-100 shadow-lg">
-            <div className="card-body">
-              <h1 className="text-2xl font-heading font-bold text-center">
-                {title}
-              </h1>
-              {subtitle && (
-                <p className="text-base-content/60 text-center mb-6">
-                  {subtitle}
-                </p>
-              )}
-              {children}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-```
+**Key Design Decisions:**
+- Split-screen layout: 50% decorative branding (desktop only), 50% form
+- Left panel with primary color background and gradient overlay (from-primary to-primary/80)
+- Brand messaging on left: logo, tagline, and descriptive copy in primary-content color
+- Decorative tribal pattern overlay with low opacity for subtle visual interest
+- Right panel centered form with flexbox (items-center justify-center)
+- Mobile-first: left panel hidden on mobile (hidden lg:flex), logo shown above form on mobile
+- Card component for form content with shadow-lg for elevated appearance
+- Fixed max-width (max-w-md) for form to prevent over-stretching on large screens
+- Title and optional subtitle props for flexible content
+- Children prop for form content composition
 
 ---
 
